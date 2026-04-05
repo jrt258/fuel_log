@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -202,8 +203,9 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    position: relative;
   }
-  .form-row { display: flex; gap: 8px; }
+  .form-row { display: flex; gap: 8px; position: relative; z-index: 1; }
   .field { display: flex; flex-direction: column; gap: 5px; flex: 1; }
   .field-label { font-size: 11px; color: var(--text3); font-weight: 500; }
   input[type="text"], input[type="number"] {
@@ -384,7 +386,7 @@
   }
 
   /* Food name wrapper with recent dropdown */
-  .food-name-wrap { position: relative; }
+  .food-name-wrap { position: relative; z-index: 10; }
   .recent-btn {
     position: absolute;
     right: 8px;
@@ -408,9 +410,9 @@
     background: var(--surface);
     border: 1px solid var(--border-strong);
     border-radius: var(--radius-sm);
-    z-index: 50;
+    z-index: 200;
     overflow: hidden;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
     display: none;
   }
   .recent-dropdown.open { display: block; }
@@ -512,9 +514,9 @@
   <div class="card">
     <div class="pills-row" style="padding-bottom:12px;">
       <div class="metric-pill active-protein" id="range-7" onclick="setIntakeRange(7, this)">7 days</div>
-      <div class="metric-pill" id="range-30" onclick="setIntakeRange(30, this)">1 month</div>
-      <div class="metric-pill" id="range-90" onclick="setIntakeRange(90, this)">3 months</div>
-      <div class="metric-pill" id="range-365" onclick="setIntakeRange(365, this)">1 year</div>
+      <div class="metric-pill inactive" id="range-30" onclick="setIntakeRange(30, this)">1 month</div>
+      <div class="metric-pill inactive" id="range-90" onclick="setIntakeRange(90, this)">3 months</div>
+      <div class="metric-pill inactive" id="range-365" onclick="setIntakeRange(365, this)">1 year</div>
     </div>
     <div class="chart-container" style="height:220px;">
       <canvas id="intakeChart"></canvas>
@@ -635,8 +637,8 @@
 <script>
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const todayKey = () => new Date().toISOString().slice(0, 10);
-const fmtDate = d => { const [y, m, day] = d.split('-'); return `${parseInt(m)}/${parseInt(day)}`; };
-const fmtFull = d => { const [y, m, day] = d.split('-'); const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return `${months[parseInt(m)-1]} ${parseInt(day)}`; };
+const fmtDate = d => { const [, m, day] = d.split('-'); return `${parseInt(m)}/${parseInt(day)}`; };
+const fmtFull = d => { const [, m, day] = d.split('-'); const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return `${months[parseInt(m)-1]} ${parseInt(day)}`; };
 const isToday = d => d === todayKey();
 
 function load(key, def) {
@@ -651,7 +653,9 @@ const pillVisible = { protein: true, calories: true, weight: true };
 
 // activeLogDate tracks which day the food list shows
 let activeLogDate = todayKey();
-let foodLog = load('fl_food_' + activeLogDate, []);
+// Always read foodLog fresh from storage to avoid stale cache across sessions
+function getFoodLog() { return load('fl_food_' + activeLogDate, []); }
+let foodLog = getFoodLog();
 
 // ── Recent foods ──────────────────────────────────────────────────────────────
 // Stored as array of {name, protein, calories}, most recent first, max 5 unique names
@@ -718,7 +722,7 @@ foodDateInput.max = todayKey();
 foodDateInput.addEventListener('change', () => {
   const chosen = foodDateInput.value || todayKey();
   activeLogDate = chosen;
-  foodLog = load('fl_food_' + activeLogDate, []);
+  foodLog = getFoodLog();
   renderFoodList();
   renderMetrics();
   updateLogDateBadge();
@@ -732,7 +736,8 @@ function updateLogDateBadge() {
 
 // ── Metrics ───────────────────────────────────────────────────────────────────
 function getTotals() {
-  return foodLog.reduce((a, f) => ({ protein: a.protein + f.protein, calories: a.calories + f.calories }), { protein: 0, calories: 0 });
+  const log = getFoodLog();
+  return log.reduce((a, f) => ({ protein: a.protein + f.protein, calories: a.calories + f.calories }), { protein: 0, calories: 0 });
 }
 
 function renderMetrics() {
@@ -786,7 +791,7 @@ function addFood() {
 
   // Load the correct day's log, add, save
   activeLogDate = date;
-  foodLog = load('fl_food_' + activeLogDate, []);
+  foodLog = getFoodLog();
   foodLog.push({ name, protein, calories });
   save('fl_food_' + activeLogDate, foodLog);
   saveRecentFood({ name, protein, calories });
