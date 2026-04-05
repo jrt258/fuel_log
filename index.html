@@ -431,6 +431,44 @@
   .recent-item-macros { font-size: 11px; color: var(--text3); margin-top: 1px; }
   .recent-empty { padding: 12px; font-size: 13px; color: var(--text3); text-align: center; }
 
+  /* Quantity counter */
+  .qty-counter {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    height: 40px;
+  }
+  .qty-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text2);
+    font-size: 18px;
+    font-weight: 400;
+    width: 36px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.1s, color 0.1s;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .qty-btn:active { background: var(--border); color: var(--text); }
+  .qty-display {
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    min-width: 28px;
+    text-align: center;
+    user-select: none;
+  }
+
   /* Log date heading row */
   .log-date-row {
     display: flex;
@@ -496,6 +534,14 @@
         <div class="field">
           <span class="field-label">Calories</span>
           <input type="number" id="food-calories" placeholder="0" min="0" inputmode="decimal" />
+        </div>
+      </div>
+      <div class="field">
+        <span class="field-label">Quantity</span>
+        <div class="qty-counter">
+          <button class="qty-btn" type="button" onclick="changeQty(-1)">−</button>
+          <span class="qty-display" id="qty-display">1</span>
+          <button class="qty-btn" type="button" onclick="changeQty(1)">+</button>
         </div>
       </div>
       <button class="btn-add" onclick="addFood()">Add to log</button>
@@ -775,11 +821,22 @@ function renderFoodList() {
   el.innerHTML = foodLog.map((f, i) => `
     <div class="food-item">
       <div>
-        <div class="food-name">${f.name}</div>
+        <div class="food-name">${f.name}${f.qty ? ` <span style="font-size:12px;color:var(--text3);font-weight:400;">×${f.qty}</span>` : ''}</div>
         <div class="food-macros">${f.protein}g protein${f.calories ? ' · ' + f.calories + ' cal' : ''}</div>
       </div>
       <button class="btn-ghost" onclick="removeFood(${i})">Remove</button>
     </div>`).join('');
+}
+
+// ── Quantity counter ──────────────────────────────────────────────────────────
+let foodQty = 1;
+function changeQty(delta) {
+  foodQty = Math.max(1, Math.min(99, foodQty + delta));
+  document.getElementById('qty-display').textContent = foodQty;
+}
+function resetQty() {
+  foodQty = 1;
+  document.getElementById('qty-display').textContent = 1;
 }
 
 function addFood() {
@@ -789,16 +846,18 @@ function addFood() {
   const date = document.getElementById('food-date').value || todayKey();
   if (!name) { document.getElementById('food-name').focus(); return; }
 
+  const qty = foodQty;
   // Load the correct day's log, add, save
   activeLogDate = date;
   foodLog = getFoodLog();
-  foodLog.push({ name, protein, calories });
+  foodLog.push({ name, protein: Math.round(protein * qty * 10) / 10, calories: Math.round(calories * qty), qty: qty > 1 ? qty : undefined });
   save('fl_food_' + activeLogDate, foodLog);
   saveRecentFood({ name, protein, calories });
 
   document.getElementById('food-name').value = '';
   document.getElementById('food-protein').value = '';
   document.getElementById('food-calories').value = '';
+  resetQty();
   document.getElementById('food-name').focus();
   document.getElementById('recent-dropdown').classList.remove('open');
   updateLogDateBadge();
