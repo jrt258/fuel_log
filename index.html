@@ -517,7 +517,7 @@
       <div class="field">
         <span class="field-label">Food name</span>
         <div class="food-name-wrap">
-          <input type="text" id="food-name" placeholder="e.g. Chicken breast" autocomplete="off" autocorrect="off" style="padding-right:36px;" />
+          <input type="text" id="food-name" placeholder="e.g. Chicken breast" autocomplete="new-password" autocorrect="off" autocapitalize="none" spellcheck="false" name="food-name-nofill" style="padding-right:36px;" />
           <button class="recent-btn" onclick="toggleRecentDropdown(event)" title="Recent foods" type="button">
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="8" cy="8" r="6"/><polyline points="8,5 8,8 10,10"/>
@@ -682,7 +682,7 @@
 
 <script>
 // ── Helpers ──────────────────────────────────────────────────────────────────
-const todayKey = () => new Date().toISOString().slice(0, 10);
+const todayKey = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 const fmtDate = d => { const [, m, day] = d.split('-'); return `${parseInt(m)}/${parseInt(day)}`; };
 const fmtFull = d => { const [, m, day] = d.split('-'); const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return `${months[parseInt(m)-1]} ${parseInt(day)}`; };
 const isToday = d => d === todayKey();
@@ -975,12 +975,14 @@ function renderIntakeChart() {
         yProtein: {
           position: 'left', grid: { color: gridColor },
           ticks: { color: isDark ? '#2bc492' : '#1D9E75', font: { size: 10, family: 'DM Mono' }, maxTicksLimit: 5 },
-          title: { display: true, text: 'g', color: isDark ? '#2bc492' : '#1D9E75', font: { size: 10 } }
+          title: { display: true, text: 'g', color: isDark ? '#2bc492' : '#1D9E75', font: { size: 10 } },
+          grace: '10%'
         },
         yCalories: {
           position: 'right', grid: { drawOnChartArea: false },
           ticks: { color: isDark ? '#5498e8' : '#2874c8', font: { size: 10, family: 'DM Mono' }, maxTicksLimit: 5 },
-          title: { display: true, text: 'cal', color: isDark ? '#5498e8' : '#2874c8', font: { size: 10 } }
+          title: { display: true, text: 'cal', color: isDark ? '#5498e8' : '#2874c8', font: { size: 10 } },
+          grace: '10%'
         }
       }
     }
@@ -1034,14 +1036,14 @@ function renderOverviewChart() {
   if (pillVisible.protein) {
     datasets.push({ label: 'Protein (g)', data: dailyData.map(d => d.protein || null), borderColor: isDark ? '#2bc492' : '#1D9E75', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3, pointBackgroundColor: isDark ? '#2bc492' : '#1D9E75', tension: 0.35, spanGaps: true, yAxisID: 'yLeft' });
     if (goals.protein) datasets.push({ label: 'Protein goal', data: dailyData.map(() => goals.protein), borderColor: isDark ? 'rgba(43,196,146,0.4)' : 'rgba(29,158,117,0.4)', borderWidth: 1.5, borderDash: [5,4], pointRadius: 0, spanGaps: true, yAxisID: 'yLeft' });
-    scales.yLeft = { position: 'left', grid: { color: gridColor }, ticks: { color: isDark ? '#2bc492' : '#1D9E75', font: { size: 10, family: 'DM Mono' }, maxTicksLimit: 5 } };
+    scales.yLeft = { position: 'left', grid: { color: gridColor }, ticks: { color: isDark ? '#2bc492' : '#1D9E75', font: { size: 10, family: 'DM Mono' }, maxTicksLimit: 5 }, grace: '10%' };
   }
 
   if (pillVisible.calories) {
     const axisId = pillVisible.protein ? 'yRight' : 'yLeft';
     datasets.push({ label: 'Calories', data: dailyData.map(d => d.calories || null), borderColor: isDark ? '#5498e8' : '#2874c8', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3, pointBackgroundColor: isDark ? '#5498e8' : '#2874c8', tension: 0.35, spanGaps: true, yAxisID: axisId });
     if (goals.calories) datasets.push({ label: 'Calorie goal', data: dailyData.map(() => goals.calories), borderColor: isDark ? 'rgba(84,152,232,0.4)' : 'rgba(40,116,200,0.4)', borderWidth: 1.5, borderDash: [5,4], pointRadius: 0, spanGaps: true, yAxisID: axisId });
-    const calAxis = { grid: { color: pillVisible.protein ? 'transparent' : gridColor, drawOnChartArea: !pillVisible.protein }, ticks: { color: isDark ? '#5498e8' : '#2874c8', font: { size: 10, family: 'DM Mono' }, maxTicksLimit: 5 } };
+    const calAxis = { grid: { color: pillVisible.protein ? 'transparent' : gridColor, drawOnChartArea: !pillVisible.protein }, ticks: { color: isDark ? '#5498e8' : '#2874c8', font: { size: 10, family: 'DM Mono' }, maxTicksLimit: 5 }, grace: '10%' };
     if (pillVisible.protein) { calAxis.position = 'right'; scales.yRight = calAxis; } else { calAxis.position = 'left'; scales.yLeft = calAxis; }
   }
 
@@ -1050,7 +1052,7 @@ function renderOverviewChart() {
     const wAxisId = (!pillVisible.protein && !pillVisible.calories) ? 'yLeft' : 'yWeight';
     datasets.push({ label: 'Weight (lbs)', data: weightData, borderColor: isDark ? '#e09a2a' : '#b87314', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3, pointBackgroundColor: isDark ? '#e09a2a' : '#b87314', tension: 0.35, spanGaps: true, yAxisID: wAxisId });
     if (goals.weight) datasets.push({ label: 'Weight goal', data: dailyData.map(() => goals.weight), borderColor: isDark ? 'rgba(224,154,42,0.4)' : 'rgba(184,115,20,0.4)', borderWidth: 1.5, borderDash: [5,4], pointRadius: 0, spanGaps: true, yAxisID: wAxisId });
-    const wAxis = { ticks: { color: isDark ? '#e09a2a' : '#b87314', font: { size: 10, family: 'DM Mono' }, maxTicksLimit: 5 }, grid: { color: gridColor, drawOnChartArea: !pillVisible.protein && !pillVisible.calories } };
+    const wAxis = { ticks: { color: isDark ? '#e09a2a' : '#b87314', font: { size: 10, family: 'DM Mono' }, maxTicksLimit: 5 }, grid: { color: gridColor, drawOnChartArea: !pillVisible.protein && !pillVisible.calories }, grace: '10%' };
     if (!pillVisible.protein && !pillVisible.calories) { wAxis.position = 'left'; scales.yLeft = wAxis; } else { wAxis.position = 'right'; scales.yWeight = wAxis; }
   }
 
@@ -1170,7 +1172,7 @@ function renderWeightChart() {
       plugins: { legend: { display: false } },
       scales: {
         x: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11, family: 'DM Mono' }, maxTicksLimit: maxTicks } },
-        y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11, family: 'DM Mono' } } }
+        y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11, family: 'DM Mono' } }, grace: '10%' }
       }
     }
   });
