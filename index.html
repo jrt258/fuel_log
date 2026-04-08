@@ -387,7 +387,22 @@
 
   /* Food name wrapper with recent dropdown */
   /* Strip default search input OS styling */
-  input[type="search"] { -webkit-appearance: none; appearance: none; }
+  input[type="search"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    padding: 9px 11px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input[type="search"]:focus { border-color: var(--green); }
+  input[type="search"]::placeholder { color: var(--text3); }
   input[type="search"]::-webkit-search-decoration,
   input[type="search"]::-webkit-search-cancel-button,
   input[type="search"]::-webkit-search-results-button,
@@ -417,7 +432,8 @@
     border: 1px solid var(--border-strong);
     border-radius: var(--radius-sm);
     z-index: 200;
-    overflow: hidden;
+    overflow-y: auto;
+    max-height: 320px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.18);
     display: none;
   }
@@ -521,7 +537,7 @@
         <input type="date" id="food-date" />
       </div>
       <div class="field">
-        <span class="field-label">Food name</span>
+        <span class="field-label">Food</span>
         <div class="food-name-wrap">
           <input type="search" id="food-name" placeholder="e.g. Chicken breast" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" name="food-name-nofill" style="padding-right:36px;" />
           <button class="recent-btn" onclick="toggleRecentDropdown(event)" title="Recent foods" type="button">
@@ -554,14 +570,6 @@
     </div>
   </div>
 
-  <div class="log-date-row">
-    <span class="log-date-label">Log for</span>
-    <span class="log-date-badge" id="log-date-badge">Today</span>
-  </div>
-  <div class="card" id="food-list-card">
-    <div class="food-item"><div class="empty-state">Nothing logged yet</div></div>
-  </div>
-
   <div class="section-heading">Intake trend</div>
   <div class="card">
     <div class="pills-row" style="padding-bottom:12px;">
@@ -573,6 +581,14 @@
     <div class="chart-container" style="height:220px;">
       <canvas id="intakeChart"></canvas>
     </div>
+  </div>
+
+  <div class="log-date-row">
+    <span class="log-date-label">Log for</span>
+    <span class="log-date-badge" id="log-date-badge">Today</span>
+  </div>
+  <div class="card" id="food-list-card">
+    <div class="food-item"><div class="empty-state">Nothing logged yet</div></div>
   </div>
 </div>
 
@@ -716,7 +732,7 @@ function saveRecentFood(item) {
   let recents = getRecentFoods();
   recents = recents.filter(r => r.name.toLowerCase() !== item.name.toLowerCase());
   recents.unshift({ name: item.name, protein: item.protein, calories: item.calories });
-  recents = recents.slice(0, 5);
+  recents = recents.slice(0, 10);
   save('fl_recent', recents);
 }
 
