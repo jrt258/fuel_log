@@ -387,26 +387,7 @@
 
   /* Food name wrapper with recent dropdown */
   /* Strip default search input OS styling */
-  input[type="search"] {
-    -webkit-appearance: none;
-    appearance: none;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    padding: 9px 11px;
-    width: 100%;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  input[type="search"]:focus { border-color: var(--green); }
-  input[type="search"]::placeholder { color: var(--text3); }
-  input[type="search"]::-webkit-search-decoration,
-  input[type="search"]::-webkit-search-cancel-button,
-  input[type="search"]::-webkit-search-results-button,
-  input[type="search"]::-webkit-search-results-decoration { display: none; }
+  
   .food-name-wrap { position: relative; z-index: 10; }
   .recent-btn {
     position: absolute;
@@ -539,7 +520,7 @@
       <div class="field">
         <span class="field-label">Food</span>
         <div class="food-name-wrap">
-          <input type="search" id="food-name" placeholder="e.g. Chicken breast" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" name="food-name-nofill" style="padding-right:36px;" />
+          <input type="text" id="food-name" placeholder="e.g. Chicken breast" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" name="food-name-nofill" style="padding-right:36px;" />
           <button class="recent-btn" onclick="toggleRecentDropdown(event)" title="Recent foods" type="button">
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="8" cy="8" r="6"/><polyline points="8,5 8,8 10,10"/>
